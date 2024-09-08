@@ -26,7 +26,8 @@ class Rebuild extends AbstractController
         $computedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
 
         if (hash_equals($computedSignature, $signature)) {
-            $logger->info('GitHub Webhook received', $payload);
+            $logger->info('GitHub Webhook received: ' . $request->getContent());
+            $this->runRebuild($kernel);
             return new Response('Webhook processed', Response::HTTP_OK);
         } else {
             return new Response('Invalid signature', Response::HTTP_FORBIDDEN);
@@ -36,7 +37,13 @@ class Rebuild extends AbstractController
     private function runRebuild(Kernel $kernel): void
     {
         $process = new Process(
-            command: ['/bin/bash', 'bin/rebuild.sh', '2>&1 &'],
+            command: [
+                '/bin/bash',
+                'bin/rebuild.sh',
+                '2>&1',
+                sprintf('>%s/system.log', $kernel->getLogDir()),
+                '&'
+            ],
             cwd: $kernel->getProjectDir(),
             timeout: null
         );
