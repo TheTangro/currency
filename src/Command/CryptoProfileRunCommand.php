@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\ParserProfile;
 use App\Kernel;
 use App\Repository\ParserProfileRepository;
+use App\Service\PoisonPillManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -33,7 +34,8 @@ class CryptoProfileRunCommand extends Command
     public function __construct(
         private readonly ParserProfileRepository $parserProfileRepository,
         private readonly Kernel $kernel,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly PoisonPillManager $poisonPillManager
     ) {
         parent::__construct();
     }
@@ -60,7 +62,7 @@ class CryptoProfileRunCommand extends Command
             }
 
             sleep(1);
-        } while (true);
+        } while (!$this->poisonPillManager->isNeedDie());
 
         return Command::SUCCESS;
     }
