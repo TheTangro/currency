@@ -41,12 +41,15 @@ class Rebuild extends AbstractController
                 '/bin/bash',
                 'bin/rebuild.sh',
                 '2>&1',
-                sprintf('>%s/system.log', $kernel->getLogDir()),
-                '&'
+                sprintf('>%s/system.log', $kernel->getLogDir())
             ],
             cwd: $kernel->getProjectDir(),
             timeout: null
         );
         $process->start();
+        
+        while ($process->isRunning()) {
+            sleep(1);
+        }
     }
 }
