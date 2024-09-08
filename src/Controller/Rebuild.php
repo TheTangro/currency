@@ -27,21 +27,20 @@ class Rebuild extends AbstractController
 
         if (hash_equals($computedSignature, $signature)) {
             $logger->info('GitHub Webhook received: ' . $request->getContent());
-            $this->runRebuild($kernel);
+            $this->runRebuild($kernel, $logger);
             return new Response('Webhook processed', Response::HTTP_OK);
         } else {
             return new Response('Invalid signature', Response::HTTP_FORBIDDEN);
         }
     }
 
-    private function runRebuild(Kernel $kernel): void
+    private function runRebuild(Kernel $kernel, LoggerInterface $logger): void
     {
         $process = new Process(
             command: [
                 '/bin/bash',
                 'bin/rebuild.sh',
-                '2>&1',
-                sprintf('>%s/system.log', $kernel->getLogDir())
+                '2>&1'
             ],
             cwd: $kernel->getProjectDir(),
             timeout: null
@@ -51,5 +50,7 @@ class Rebuild extends AbstractController
         while ($process->isRunning()) {
             sleep(1);
         }
+
+        $logger->info('Rebuild successfully: ' . $process->getOutput());
     }
 }
