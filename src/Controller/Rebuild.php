@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Kernel;
+use App\Service\ConfigManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,11 +19,12 @@ class Rebuild extends AbstractController
     public function execute(
         Request $request,
         LoggerInterface $logger,
-        Kernel $kernel
+        Kernel $kernel,
+        ConfigManager $configManager
     ): Response {
         $payload = json_decode($request->getContent(), true);
         $signature = $request->headers->get('X-Hub-Signature-256');
-        $secret = (string) getenv('GITHUB_SECRET');
+        $secret = (string) getenv('GITHUB_SECRET') ?: $configManager->getGithubSecret();
         $computedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
 
         if (hash_equals($computedSignature, $signature)) {

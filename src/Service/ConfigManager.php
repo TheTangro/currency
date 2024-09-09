@@ -21,4 +21,11 @@ class ConfigManager
 
         return (int) $config?->getValue() ?: self::MAX_MESSAGES;
     }
+
+    public function getGithubSecret(): string
+    {
+        $config = $this->configRepository->findOneByPath('app/webhook/runner/github_secret');
+
+        return (string) $config?->getValue();
+    }
 }
