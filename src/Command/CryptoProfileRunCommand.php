@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\ParserProfile;
 use App\Kernel;
 use App\Repository\ParserProfileRepository;
+use App\Service\ConfigManager;
 use App\Service\PoisonPillManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -35,7 +36,8 @@ class CryptoProfileRunCommand extends Command
         private readonly ParserProfileRepository $parserProfileRepository,
         private readonly Kernel $kernel,
         private readonly LoggerInterface $logger,
-        private readonly PoisonPillManager $poisonPillManager
+        private readonly PoisonPillManager $poisonPillManager,
+        private readonly ConfigManager $configManager
     ) {
         parent::__construct();
     }
@@ -92,8 +94,8 @@ class CryptoProfileRunCommand extends Command
         $command[] = sprintf('--from=%s', $parserProfile->getCurrencyFrom());
         $command[] = sprintf('--to=%s', $parserProfile->getCurrencyTo());
 
-        if (self::MAX_MESSAGES) {
-            $command[] = sprintf('--max-messages=%s', (string) self::MAX_MESSAGES);
+        if ($this->configManager->getMaxMessages()) {
+            $command[] = sprintf('--max-messages=%s', (string) $this->configManager->getMaxMessages());
         }
 
         return $command;
