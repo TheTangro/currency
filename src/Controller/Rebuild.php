@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -23,11 +24,17 @@ class Rebuild extends AbstractController
         ConfigManager $configManager
     ): Response {
         $payload = json_decode($request->getContent(), true);
-        $signature = $request->headers->get('X-Hub-Signature-256');
+        $signature = (string) $request->headers->get('X-Hub-Signature');
         $secret = (string) getenv('GITHUB_SECRET') ?: $configManager->getGithubSecret();
-        $computedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+        $signatureParts = explode('=', $signature);
 
-        if (hash_equals($computedSignature, $signature)) {
+        if (count($signatureParts) != 2) {
+            throw new BadRequestHttpException('signature has invalid format');
+        }
+
+        $computedSign = hash_hmac('sha1', $request->getContent(), $secret);
+
+        if (hash_equals($computedSign, $signatureParts[1])) {
             $logger->info('GitHub Webhook received: ' . $request->getContent());
             $this->runRebuild($kernel, $logger);
             return new Response('Webhook processed', Response::HTTP_OK);
