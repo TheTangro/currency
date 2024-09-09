@@ -36,4 +36,24 @@ class CurrencyRateRepository extends ServiceEntityRepository
                 ->getOneOrNullResult()
             ;
         }
+
+        public function getRowsCount(string $currencyFrom, string $currencyTo): int
+        {
+            $qb = $this->createQueryBuilder('c');
+            $qb->andWhere('c.currency_from = :cf')
+                ->setParameter('cf', $currencyFrom)
+                ->andWhere('c.currency_to = :ct')
+                ->setParameter('ct', $currencyTo);
+            $qb->select('COUNT(c.id)');
+
+            return (int) $qb->getQuery()->getSingleScalarResult();
+        }
+
+        public function getAllRowsCount(): int
+        {
+            $qb = $this->createQueryBuilder('c');
+            $qb->select('COUNT(c.id)');
+
+            return (int) $qb->getQuery()->getSingleScalarResult();
+        }
 }

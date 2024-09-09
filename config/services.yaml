@@ -19,6 +19,16 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    TelegramGrabberInfoCommand:
+        autowire: true
+        autoconfigure: true
+        public: true
+        class: \App\Service\Telegram\Commands\GrabberInfo
+    TelegramLastRatesCommand:
+        autowire: true
+        autoconfigure: true
+        public: true
+        class: \App\Service\Telegram\Commands\LastRates
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

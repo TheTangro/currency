@@ -33,4 +33,11 @@ class ConfigManager
 
         return (string) $config?->getValue();
     }
+
+    public function getTelegramBotApiToken(): string
+    {
+        $config = $this->configRepository->findOneByPath('app/telegram/api_token');
+
+        return (string) $config?->getValue();
+    }
 }
