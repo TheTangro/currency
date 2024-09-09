@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\CurrencyRate;
 use App\Exception\MaxMessagesExceedException;
+use App\Repository\CurrencyRateRepository;
 use App\Service\Currency\ManagerInterface;
 use App\Service\DataRetrievers\SubscriberInterface;
 use Psr\Log\LoggerInterface;
@@ -23,7 +24,8 @@ class CryptoCurrencyParseCommand extends Command
     public function __construct(
         private readonly SubscriberInterface $subscriber,
         private readonly ManagerInterface $currencyManager,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly CurrencyRateRepository $currencyRateRepository
     ) {
         parent::__construct();
     }
@@ -84,6 +86,18 @@ class CryptoCurrencyParseCommand extends Command
             exit;
         }
 
-        $this->currencyManager->writeNewCurrencyRateAsObject($currencyRate);
+        $last = $this->currencyRateRepository->getLast(
+            $currencyRate->getCurrencyFrom(),
+            $currencyRate->getCurrencyTo()
+        );
+
+        if ($last !== null) {
+            echo $last->getRate();
+            echo $currencyRate->getRate();
+        }
+
+        if (!$last || $last->getRate() !== $currencyRate->getRate()) {
+            $this->currencyManager->writeNewCurrencyRateAsObject($currencyRate);
+        }
     }
 }

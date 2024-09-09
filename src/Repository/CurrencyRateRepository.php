@@ -23,28 +23,16 @@ class CurrencyRateRepository extends ServiceEntityRepository
         $em->flush();
     }
 
-    //    /**
-    //     * @return CurrencyRate[] Returns an array of CurrencyRate objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?CurrencyRate
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        public function getLast(string $currencyFrom, string $currencyTo): ?CurrencyRate
+        {
+            return $this->createQueryBuilder('c')
+                ->andWhere('c.currency_from = :cf')
+                ->setParameter('cf', $currencyFrom)
+                ->andWhere('c.currency_to = :ct')
+                ->setParameter('cf', $currencyTo)
+                ->orderBy('c.id', 'DESC')
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        }
 }
