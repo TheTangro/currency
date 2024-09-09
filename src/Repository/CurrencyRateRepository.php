@@ -29,8 +29,9 @@ class CurrencyRateRepository extends ServiceEntityRepository
                 ->andWhere('c.currency_from = :cf')
                 ->setParameter('cf', $currencyFrom)
                 ->andWhere('c.currency_to = :ct')
-                ->setParameter('cf', $currencyTo)
+                ->setParameter('ct', $currencyTo)
                 ->orderBy('c.id', 'DESC')
+                ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult()
             ;

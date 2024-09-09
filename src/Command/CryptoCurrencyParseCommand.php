@@ -86,15 +86,11 @@ class CryptoCurrencyParseCommand extends Command
             exit;
         }
 
+
         $last = $this->currencyRateRepository->getLast(
             $currencyRate->getCurrencyFrom(),
             $currencyRate->getCurrencyTo()
         );
-
-        if ($last !== null) {
-            echo $last->getRate();
-            echo $currencyRate->getRate();
-        }
 
         if (!$last || $last->getRate() !== $currencyRate->getRate()) {
             $this->currencyManager->writeNewCurrencyRateAsObject($currencyRate);
