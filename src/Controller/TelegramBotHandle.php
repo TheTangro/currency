@@ -53,7 +53,7 @@ class TelegramBotHandle extends AbstractController
             true
         );
 
-        if ($message->getChat()?->getId()) {
+        if ($message && $message->getChat()?->getId()) {
             switch ($message->getText()) {
                 case '/start':
                     $client->sendMessage(
@@ -84,7 +84,7 @@ class TelegramBotHandle extends AbstractController
                                 chatId: $message->getChat()->getId(),
                                 text: $response,
                                 parseMode: $command->getParseMode(),
-                                replyMarkup: $command->getKeyboard()
+                                replyMarkup: $command->getKeyboard() ?: $initialMarkup
                             );
                         }
                     } else {
