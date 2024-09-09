@@ -22,6 +22,11 @@ class ConfigManager
         return (int) $config?->getValue() ?: self::MAX_MESSAGES;
     }
 
+    /**
+     * Returns hithub secred stored in the DB
+     *
+     * @return string
+     */
     public function getGithubSecret(): string
     {
         $config = $this->configRepository->findOneByPath('app/webhook/runner/github_secret');
