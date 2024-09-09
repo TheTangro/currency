@@ -24,15 +24,15 @@ class Rebuild extends AbstractController
         ConfigManager $configManager
     ): Response {
         $payload = json_decode($request->getContent(), true);
-        $signature = (string) $request->headers->get('X-Hub-Signature');
-        $secret = (string) getenv('GITHUB_SECRET') ?: $configManager->getGithubSecret();
+        $signature = (string) $request->headers->get('X-Hub-Signature-256');
+        $secret = $configManager->getGithubSecret();
         $signatureParts = explode('=', $signature);
 
         if (count($signatureParts) != 2) {
             throw new BadRequestHttpException('signature has invalid format');
         }
 
-        $computedSign = hash_hmac('sha1', $request->getContent(), $secret);
+        $computedSign = hash_hmac('sha256', $request->getContent(), $secret);
 
         if (hash_equals($computedSign, $signatureParts[1])) {
             $logger->info('GitHub Webhook received: ' . $request->getContent());
