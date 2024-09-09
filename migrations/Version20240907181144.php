@@ -20,8 +20,6 @@ final class Version20240907181144 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP SEQUENCE currency_rate_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE parser_profile_id_seq CASCADE');
         $this->addSql('CREATE SEQUENCE currency_rate_id INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE parser_profile_id INCREMENT BY 1 MINVALUE 1 START 1');
     }
