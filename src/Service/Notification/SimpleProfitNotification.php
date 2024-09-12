@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Notification;
 
+use App\Entity\CurrencyRate;
 use App\Kernel;
 use App\Repository\CurrencyRateRepository;
 use App\Service\Notification\SendingStrategy\SendingStrategyInterface;
@@ -18,6 +19,8 @@ class SimpleProfitNotification extends AbstractCurrencyNotification
     private CurrencyRateRepository|null $currencyRateRepository = null;
 
     private \DateTimeInterface|null $nextAllowedSending = null;
+
+    private ?float $lastProfit = null;
 
     public function __construct(
         private readonly string $currencyFrom,
@@ -40,11 +43,8 @@ class SimpleProfitNotification extends AbstractCurrencyNotification
             );
 
             if ($last) {
-                $cryptoCurrencyAmount = $this->tradeAmount / $this->dealCost;
-                $newFiatCost = $cryptoCurrencyAmount * $last->getRate();
-                $profit = $newFiatCost - $this->tradeAmount;
-                $profit = round($profit, 2);
                 $targetProfit = round($this->profitAmount, 2);
+                $profit = $this->calculateProfit($last);
 
                 return $this->isFloatEqual($profit, $targetProfit) || $this->isFloatGreaterThan($profit, $targetProfit);
             }
@@ -91,12 +91,22 @@ class SimpleProfitNotification extends AbstractCurrencyNotification
 
     public function getText(): string
     {
+        $profit = $this->profitAmount;
+        $last = $this->currencyRateRepository->getLast(
+            $this->currencyFrom,
+            $this->currencyTo,
+        );
+
+        if ($last) {
+            $profit = $this->calculateProfit($last);
+        }
+
         return sprintf(
             'Ваша сделка на сумму %s (%s => %s) может быть закрыта с профитом = %s',
             $this->tradeAmount,
             $this->currencyFrom,
             $this->currencyTo,
-            $this->profitAmount
+            $profit
         );
     }
 
@@ -139,5 +149,19 @@ class SimpleProfitNotification extends AbstractCurrencyNotification
     public function isFloatGreaterThan(float $a, float $b): bool
     {
         return ($a - $b) > self::EPSILON;
+    }
+
+    /**
+     * @param CurrencyRate $last
+     * @return float
+     */
+    public function calculateProfit(CurrencyRate $last): float
+    {
+        $cryptoCurrencyAmount = $this->tradeAmount / $this->dealCost;
+        $newFiatCost = $cryptoCurrencyAmount * $last->getRate();
+        $profit = $newFiatCost - $this->tradeAmount;
+        $profit = round($profit, 2);
+
+        return $profit;
     }
 }
