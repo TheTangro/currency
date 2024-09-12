@@ -6,6 +6,7 @@ namespace App\Service\Telegram\NaturalLanguage;
 
 use App\Exception\CouldNotProcessException;
 use App\Service\Telegram\Commands\CommandInterface;
+use TelegramBot\Api\Types\Message;
 
 interface ProcessorInterface
 {
@@ -18,5 +19,5 @@ interface ProcessorInterface
      *
      * @throws CouldNotProcessException
      */
-    public function process(string $phrase): CommandInterface;
+    public function process(string $phrase, Message $message): ?CommandInterface;
 }

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Service\ConfigManager;
 use App\Service\Telegram\Commands\CommandInterface;
+use App\Service\Telegram\NaturalLanguage\ProcessorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,10 +20,15 @@ use TelegramBot\Api\Types\Update;
 
 class TelegramBotHandle extends AbstractController
 {
+    public function __construct(
+        private readonly ProcessorInterface $naturalLanguageProcessor
+    ) {
+    }
+
     #[Route('/bot-handle', name: 'telegram-bot-handle', methods: ['POST'])]
     public function execute(
         LoggerInterface $logger,
-        ConfigManager $configManager
+        ConfigManager $configManager,
     ): Response {
         $bot = new BotApi($configManager->getTelegramBotApiToken());
         $client = new TelegramClient($configManager->getTelegramBotApiToken());
@@ -53,16 +59,12 @@ class TelegramBotHandle extends AbstractController
             $messageText = $message->getText();
 
             switch (true) {
-                case $messageText === '/start':
-                    $client->sendMessage(
-                        chatId: $message->getChat()->getId(),
-                        text: 'Hi! What you need?',
-                        replyMarkup: $initialMarkup
-                    );
-
-                    return;
                 case str_starts_with($messageText, '/'):
                     $this->processCommand($message, $client, $initialMarkup);
+
+                    return;
+                case $this->naturalLanguageProcessor->isSupported($messageText):
+                    $this->processNaturalLanguage($message, $client, $initialMarkup);
 
                     return;
                 default:
@@ -80,6 +82,22 @@ class TelegramBotHandle extends AbstractController
         );
     }
 
+    private function processNaturalLanguage(Message $message, BotApi $client, $initialMarkup): void
+    {
+        $command = $this->naturalLanguageProcessor->process($message->getText(), $message);
+
+        if ($command) {
+            $client->sendMessage(
+                chatId: $message->getChat()->getId(),
+                text: $command->process($message),
+                parseMode: $command->getParseMode(),
+                replyMarkup: $command->getKeyboard() ?: $initialMarkup
+            );
+        } else {
+            $this->sayHello($message, $client, $initialMarkup);
+        }
+    }
+
     private function processCommand(Message $message, BotApi $client, $initialMarkup): void
     {
         $messageText = $message->getText();
@@ -91,7 +109,7 @@ class TelegramBotHandle extends AbstractController
         if (class_exists($fullClassName) && is_subclass_of($fullClassName, CommandInterface::class)) {
             try {
                 /** @var \App\Service\Telegram\Commands\CommandInterface $command * */
-                $command = $this->container->get($serviceName);
+                $command = $this->container->get($fullClassName);
             } catch (\Throwable $e) {
                 $command = new $fullClassName;
             }

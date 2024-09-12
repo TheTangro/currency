@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Telegram\Commands;
 
+use TelegramBot\Api\Types\Message;
 use TelegramBot\Api\Types\ReplyKeyboardMarkup;
 
-abstract class AbstractSimpleCommand implements CommandInterface
+class SendOk extends AbstractSimpleCommand
 {
-    public function getParseMode(): ?string
+    public function process(Message $message): string
     {
-        return null;
+        return 'Your command is accepted';
     }
 
     public function getKeyboard(): ?ReplyKeyboardMarkup

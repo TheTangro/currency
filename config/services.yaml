@@ -29,6 +29,19 @@ services:
         autoconfigure: true
         public: true
         class: \App\Service\Telegram\Commands\LastRates
+    App\Service\Notification\Transport\TelegramTransport:
+        autowire: true
+        autoconfigure: true
+        public: true
+        class: App\Service\Notification\Transport\TelegramTransport
+    App\Service\Telegram\NaturalLanguage\ProcessorInterface:
+        alias: App\Service\Telegram\NaturalLanguage\CombineProcessor
+    App\Service\Telegram\NaturalLanguage\CombineProcessor:
+        arguments:
+            $processors: !tagged_iterator 'app.natural_language.processors'
+        class: \App\Service\Telegram\NaturalLanguage\CombineProcessor
+    App\Service\Telegram\NaturalLanguage\SimpleProfitNotification:
+        tags: ['app.natural_language.processors']
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
