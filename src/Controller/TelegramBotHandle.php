@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use TelegramBot\Api\BotApi;
 use TelegramBot\Api\Client as TelegramClient;
@@ -29,11 +30,12 @@ class TelegramBotHandle extends AbstractController
     public function execute(
         LoggerInterface $logger,
         ConfigManager $configManager,
+        KernelInterface $kernel
     ): Response {
         $bot = new BotApi($configManager->getTelegramBotApiToken());
         $client = new TelegramClient($configManager->getTelegramBotApiToken());
         $client->on(
-            fn (Update $update) => $this->handleUpdate($update, $bot, $this->container),
+            fn (Update $update) => $this->handleUpdate($update, $bot, $kernel->getContainer()),
             fn() => true
         );
         $client->run();
@@ -60,7 +62,7 @@ class TelegramBotHandle extends AbstractController
 
             switch (true) {
                 case str_starts_with($messageText, '/'):
-                    $this->processCommand($message, $client, $initialMarkup);
+                    $this->processCommand($message, $client, $initialMarkup, $container);
 
                     return;
                 case $this->naturalLanguageProcessor->isSupported($messageText):
@@ -98,7 +100,7 @@ class TelegramBotHandle extends AbstractController
         }
     }
 
-    private function processCommand(Message $message, BotApi $client, $initialMarkup): void
+    private function processCommand(Message $message, BotApi $client, $initialMarkup, ContainerInterface $container): void
     {
         $messageText = $message->getText();
         $parts = explode('_', ltrim($messageText, '\/'));
@@ -109,7 +111,7 @@ class TelegramBotHandle extends AbstractController
         if (class_exists($fullClassName) && is_subclass_of($fullClassName, CommandInterface::class)) {
             try {
                 /** @var \App\Service\Telegram\Commands\CommandInterface $command * */
-                $command = $this->container->get($fullClassName);
+                $command = $container->get($serviceName);
             } catch (\Throwable $e) {
                 $command = new $fullClassName;
             }
