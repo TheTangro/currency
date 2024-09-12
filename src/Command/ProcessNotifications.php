@@ -9,6 +9,7 @@ use App\Repository\CurrencyRateRepository;
 use App\Repository\NotificationRequestRepository;
 use App\Service\Notification\Transport\TransportFactory;
 use App\Service\PoisonPillManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -27,7 +28,8 @@ class ProcessNotifications extends Command
         private readonly PoisonPillManager $poisonPillManager,
         private readonly LoggerInterface $logger,
         private readonly CurrencyRateRepository $currencyRateRepository,
-        private readonly TransportFactory $transportFactory
+        private readonly TransportFactory $transportFactory,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
     }
@@ -37,6 +39,7 @@ class ProcessNotifications extends Command
         $io = new SymfonyStyle($input, $output);
 
         do {
+            $this->entityManager->clear();
             $notificationRequests = $this->notificationRequestRepository->findAllNonFinished();
 
             if (empty($notificationRequests)) {
