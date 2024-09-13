@@ -25,9 +25,10 @@ class AverageCurrencyRateIsNotification extends AbstractCurrencyNotification
     public function getText(): string
     {
         return sprintf(
-            'На текущий момент цена %s %s среднего значения за %s на %s процента (ов)',
+            'На текущий момент цена %s %s среднего значения за %s %s на %s процента (ов)',
             $this->currencyFrom,
             $this->calculatedPercent > 0 ? 'выше' : 'ниже',
+            $this->timeAmount,
             TimePeriodMatcher::fromPhpToNatural($this->timePeriod),
             number_format((float) $this->calculatedPercent, 4, '.', '')
         );
