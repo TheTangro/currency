@@ -13,7 +13,7 @@ use TelegramBot\Api\Types\Message;
 
 class IsAverageRateIsDifferent extends AbstractNaturalLanguage
 {
-    public const MAIN_EXPR = '/[Нн]апомни.*?когда\sцена\s([A-Z]+)\sбудет\s(больше|меньше)\sсредней\sза\s(\d+)\s(день|час|минут)\sна\s([0-9\.,]+)\%\./m';
+    public const MAIN_EXPR = '/[Нн]апомни.*?когда\sцена\s([A-Z]+)\sбудет\s(больше|меньше)\sсредней\sза\s(\d+)\s(день|час|минута)\sна\s([0-9\.,]+)\%\./m';
 
     public function isSupported(string $phrase): bool
     {
