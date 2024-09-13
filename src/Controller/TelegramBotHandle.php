@@ -51,6 +51,7 @@ class TelegramBotHandle extends AbstractController
                 [
                     '/grabber_info',
                     '/last_rates',
+                    '/notifications'
                 ]
             ],
             true,
@@ -60,18 +61,26 @@ class TelegramBotHandle extends AbstractController
         if ($message && $message->getChat()?->getId()) {
             $messageText = $message->getText();
 
-            switch (true) {
-                case str_starts_with($messageText, '/'):
-                    $this->processCommand($message, $client, $initialMarkup, $container);
+           try {
+               switch (true) {
+                   case str_starts_with($messageText, '/'):
+                       $this->processCommand($message, $client, $initialMarkup, $container);
 
-                    return;
-                case $this->naturalLanguageProcessor->isSupported($messageText):
-                    $this->processNaturalLanguage($message, $client, $initialMarkup);
+                       return;
+                   case $this->naturalLanguageProcessor->isSupported($messageText):
+                       $this->processNaturalLanguage($message, $client, $initialMarkup);
 
-                    return;
-                default:
-                    $this->sayHello($message, $client, $initialMarkup);
-            }
+                       return;
+                   default:
+                       $this->sayHello($message, $client, $initialMarkup);
+               }
+           } catch (\Throwable $e) {
+               $client->sendMessage(
+                   chatId: $message->getChat()->getId(),
+                   text: 'Ups! Error(((',
+                   replyMarkup: $initialMarkup
+               );
+           }
         }
     }
 
@@ -100,6 +109,25 @@ class TelegramBotHandle extends AbstractController
         }
     }
 
+    private function executeCommand(
+        CommandInterface $command,
+        BotApi $client,
+        Message $message,
+        $initialMarkup = null
+    ): void {
+        $response = $command->process($message);
+        $responses = is_array($response) ? $response : [$response];
+
+        foreach ($responses as $response) {
+            $client->sendMessage(
+                chatId: $message->getChat()->getId(),
+                text: $response,
+                parseMode: $command->getParseMode(),
+                replyMarkup: $command->getKeyboard() ?: $initialMarkup
+            );
+        }
+    }
+
     private function processCommand(Message $message, BotApi $client, $initialMarkup, ContainerInterface $container): void
     {
         $messageText = $message->getText();
@@ -116,13 +144,7 @@ class TelegramBotHandle extends AbstractController
                 $command = new $fullClassName;
             }
 
-            $response = $command->process($message);
-            $client->sendMessage(
-                chatId: $message->getChat()->getId(),
-                text: $response,
-                parseMode: $command->getParseMode(),
-                replyMarkup: $command->getKeyboard() ?: $initialMarkup
-            );
+            $this->executeCommand($command, $client, $message, $initialMarkup);
         } else {
             $this->sayHello($message, $client, $initialMarkup);
         }

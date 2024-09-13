@@ -10,6 +10,6 @@ class SendCouldNotRecognizeCommand extends AbstractSimpleCommand
 {
     public function process(Message $message): string
     {
-        return '';
+        return 'Could not recognize command';
     }
 }

@@ -34,7 +34,9 @@ class LastRates extends AbstractHtmlCommand
                         ++$counter,
                         $parserProfile->getCurrencyFrom(),
                         $parserProfile->getCurrencyTo(),
-                        $lastRow->getCreatedAt()->format('Y-m-d H:i:s'),
+                        $lastRow->getCreatedAt()->setTimezone(
+                            new \DateTimeZone('Europe/Minsk')
+                        )->format('Y-m-d H:i:s'),
                         $this->formatNumber($lastRow->getRate())
                     );
             }

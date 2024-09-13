@@ -26,6 +26,14 @@ class NotificationRequest
     private bool $isFinished = false;
 
     #[OneToMany(
+        targetEntity: NotificationHistoryEntry::class,
+        mappedBy: 'notificationHistory',
+        cascade: ['persist', 'remove', 'detach', 'refresh'],
+        fetch: 'LAZY'
+    )]
+    private Collection|null $notificationHistory;
+
+    #[OneToMany(
         targetEntity: NotificationChannel::class,
         mappedBy: 'notificationRequest',
         cascade: ['persist', 'remove', 'detach', 'refresh'],
@@ -104,5 +112,19 @@ class NotificationRequest
         $this->isFinished = $is_finished;
 
         return $this;
+    }
+
+    public function getNotificationHistory(): Collection
+    {
+        if ($this->notificationHistory === null) {
+            $this->notificationHistory = new ArrayCollection();
+        }
+
+        return $this->notificationHistory;
+    }
+
+    public function setNotificationHistory(?Collection $notificationHistory): void
+    {
+        $this->notificationHistory = $notificationHistory;
     }
 }

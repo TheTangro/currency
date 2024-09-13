@@ -23,7 +23,12 @@ services:
         autowire: true
         autoconfigure: true
         public: true
-        class: \App\Service\Telegram\Commands\GrabberInfo
+        class: App\Service\Telegram\Commands\GrabberInfo
+    TelegramStopLastNotificationCommand:
+        autowire: true
+        autoconfigure: true
+        public: true
+        class: App\Service\Telegram\Commands\StopLastNotification
     TelegramLastRatesCommand:
         autowire: true
         autoconfigure: true
@@ -41,6 +46,10 @@ services:
             $processors: !tagged_iterator 'app.natural_language.processors'
         class: \App\Service\Telegram\NaturalLanguage\CombineProcessor
     App\Service\Telegram\NaturalLanguage\SimpleProfitNotification:
+        tags: ['app.natural_language.processors']
+    App\Service\Telegram\NaturalLanguage\CurrencyRateIsEqualAtNotification:
+        tags: ['app.natural_language.processors']
+    App\Service\Telegram\NaturalLanguage\IsAverageRateIsDifferent:
         tags: ['app.natural_language.processors']
 
     # add more service definitions when explicit configuration is needed

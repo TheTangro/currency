@@ -17,6 +17,8 @@ use TelegramBot\Api\Types\Message;
 
 class SimpleProfitNotification implements ProcessorInterface
 {
+    use RepeatableNotificationTrait;
+
     public const MAIN_PATTERN
         = '/.*?вошел.*?([A-Z]+).*?([0-9.,]+).*?([0-9.,]+).*?[Нн]апомни.*?(прибыль|убыток).*?([0-9.,]+).*$/mu';
 
@@ -45,16 +47,7 @@ class SimpleProfitNotification implements ProcessorInterface
             $tradeAmount = (float) trim($tradeAmount, ',.');
             $dealCost = (float) trim($dealCost, ',.');
 
-            if (preg_match('/.*повторять.*?(\d+).*?(частот.*?(\d+).*)/us', $phrase, $frequencyMatches)) {
-                if (count($frequencyMatches) === 2) {
-                    [, $repeatAmount] = $frequencyMatches;
-                    $repeatAmount = (int) $repeatAmount;
-                }  elseif (count($frequencyMatches) === 4) {
-                    [, $repeatAmount,,$frequency] = $frequencyMatches;
-                    $repeatAmount = (int) $repeatAmount;
-                    $frequency = (int) $frequency;
-                }
-            }
+            $strategy = $this->generateNotificationStrategy($phrase);
 
             $simpleProfitNotification = new SimpleProfitNotificationSender(
                 $currencyFrom,

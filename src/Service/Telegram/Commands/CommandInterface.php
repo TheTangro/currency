@@ -9,7 +9,7 @@ use TelegramBot\Api\Types\ReplyKeyboardMarkup;
 
 interface CommandInterface
 {
-    public function process(Message $message): string;
+    public function process(Message $message): string|array;
 
     public function getParseMode(): ?string;
 

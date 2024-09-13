@@ -11,7 +11,7 @@ class SendOk extends AbstractSimpleCommand
 {
     public function process(Message $message): string
     {
-        return 'Your command is accepted';
+        return 'Your command has been accepted';
     }
 
     public function getKeyboard(): ?ReplyKeyboardMarkup
