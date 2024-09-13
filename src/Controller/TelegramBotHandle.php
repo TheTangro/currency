@@ -77,7 +77,7 @@ class TelegramBotHandle extends AbstractController
            } catch (\Throwable $e) {
                $client->sendMessage(
                    chatId: $message->getChat()->getId(),
-                   text: 'Ups! Error(((',
+                   text: 'Ups! Error(((' . PHP_EOL . $e->getMessage(),
                    replyMarkup: $initialMarkup
                );
            }
