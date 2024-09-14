@@ -31,7 +31,7 @@ class CurrencyRateIsEqualAtNotification extends AbstractNaturalLanguage
                 $currencyFrom,
                 $this->generateNotificationStrategy($phrase)
             );
-            $this->persistNotificationProcessor($simpleCurrencyRateIsEqual);
+            $this->persistNotificationProcessor($simpleCurrencyRateIsEqual, $message);
 
             return new SendOk;
         }
