@@ -22,7 +22,7 @@ class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
         $last = $this->currencyRateRepository->getLast($this->currencyFrom, $this->currencyTo);
         $currentRate = (float) $last?->getRate();
         $isMainLogicTrue = $this->isFloatEqual($this->currencyRate, (float) $currentRate)
-            || $this->isFloatGreaterThan($currentRate, $this->currencyRate);
+            || $this->isFloatGreaterThan($this->currencyRate, $currentRate);
 
         return $isMainLogicTrue;
     }
