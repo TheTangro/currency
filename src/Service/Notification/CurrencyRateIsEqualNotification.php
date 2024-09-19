@@ -58,7 +58,12 @@ class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
         $last = $this->currencyRateRepository->getLast($this->currencyFrom, $this->currencyTo);
         $currencyRate = $last?->getRate();
 
-        return sprintf('Текущий курс %s = %s', $this->currencyFrom, $this->formatUsd($currencyRate));
+        return sprintf(
+            'Текущий курс %s = %s. Целевой курс сравнения %s',
+            $this->currencyFrom,
+            $this->formatUsd($currencyRate),
+            $this->currencyRate
+        );
     }
 
     public function __serialize(): array
