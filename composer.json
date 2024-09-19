@@ -20,7 +20,8 @@
         "symfony/process": "7.1.*",
         "symfony/runtime": "7.1.*",
         "symfony/yaml": "7.1.*",
-        "telegram-bot/api": "^2.5"
+        "telegram-bot/api": "^2.5",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.61"

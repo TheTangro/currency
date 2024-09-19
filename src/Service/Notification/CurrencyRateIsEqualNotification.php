@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Notification;
 
+use App\Entity\CurrencyRate;
 use App\Service\Notification\SendingStrategy\SendingStrategyInterface;
+use App\Service\Utils\FloatUtils;
 
 class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
 {
+    private ?CurrencyRate $lastRate = null;
+
     public function __construct(
         private float $currencyRate,
         private string $currencyFrom,
@@ -19,12 +23,34 @@ class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
 
     protected function isMainLogicTrue(): bool
     {
-        $last = $this->currencyRateRepository->getLast($this->currencyFrom, $this->currencyTo);
-        $currentRate = (float) $last?->getRate();
-        $isMainLogicTrue = $this->isFloatEqual($this->currencyRate, (float) $currentRate)
-            || $this->isFloatGreaterThan($this->currencyRate, $currentRate);
+        try {
+            $currentRateObject = $this->currencyRateRepository->getLast($this->currencyFrom, $this->currencyTo);
 
-        return $isMainLogicTrue;
+            if (false === $currentRateObject instanceof CurrencyRate) {
+                return false;
+            } else {
+                $currentRate = $currentRateObject?->getRate();
+                $scale = FloatUtils::getScale($this->currencyRate);
+
+                $result = bccomp((string) $this->currencyRate, (string) $currentRate, $scale) === 0;
+
+                if (!$result && $this->lastRate !== null) {
+                    $isPreviousIsLowerThanAndCurrentIsGreaterThanTarget =
+                        bccomp($this->lastRate->getRate(), (string) $this->currencyRate, $scale) < 0
+                        && bccomp($currentRate, (string) $this->currencyRate, $scale) > 0;
+                    $isPreviousIsGreaterThanAndCurrentIsLowerThanTarget =
+                        bccomp($this->lastRate->getRate(), (string) $this->currencyRate, $scale) > 0
+                        && bccomp($currentRate, (string) $this->currencyRate, $scale) < 0;
+
+                    $result = $isPreviousIsGreaterThanAndCurrentIsLowerThanTarget
+                        || $isPreviousIsLowerThanAndCurrentIsGreaterThanTarget;
+                }
+
+                return $result;
+            }
+        } finally {
+            $this->lastRate = $currentRateObject ?? null;
+        }
     }
 
     public function getText(): string
@@ -40,7 +66,8 @@ class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
         $result = [
             'currencyFrom' => $this->currencyFrom,
             'currencyRate' => $this->currencyRate,
-            'currencyTo' => $this->currencyTo
+            'currencyTo' => $this->currencyTo,
+            'lastRate ' => $this->lastRate,
         ];
 
         return array_replace(parent::__serialize(), $result);
