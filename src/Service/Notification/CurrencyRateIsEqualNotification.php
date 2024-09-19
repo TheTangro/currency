@@ -8,6 +8,7 @@ use App\Entity\CurrencyRate;
 use App\Service\Notification\SendingStrategy\SendingStrategyInterface;
 use App\Service\Utils\FloatUtils;
 
+#[\AllowDynamicProperties]
 class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
 {
     protected ?CurrencyRate $lastRate = null;
