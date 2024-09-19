@@ -8,7 +8,6 @@ use App\Entity\CurrencyRate;
 use App\Service\Notification\SendingStrategy\SendingStrategyInterface;
 use App\Service\Utils\FloatUtils;
 
-#[\AllowDynamicProperties]
 class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
 {
     protected ?CurrencyRate $lastRate = null;
@@ -73,7 +72,7 @@ class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
             'currencyFrom' => $this->currencyFrom,
             'currencyRate' => $this->currencyRate,
             'currencyTo' => $this->currencyTo,
-            'lastRate ' => $this->lastRate,
+            'lastRate' => $this->lastRate,
         ];
 
         return array_replace(parent::__serialize(), $result);

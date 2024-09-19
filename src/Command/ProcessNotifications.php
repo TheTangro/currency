@@ -66,12 +66,12 @@ class ProcessNotifications extends Command
                             }
 
                             $notificationSender->updateNotificationData();
-                            $notificationRequest->setNotification($notificationSender);
-                            $this->notificationRequestRepository->save($notificationRequest);
                         } elseif ($notificationSender->isFinished()) {
                             $notificationRequest->setFinished(true);
-                            $this->notificationRequestRepository->save($notificationRequest);
                         }
+
+                        $notificationRequest->setNotification($notificationSender);
+                        $this->notificationRequestRepository->save($notificationRequest);
                     }
                 } catch (\Throwable $e) {
                     $this->logger->error($e->getMessage());
