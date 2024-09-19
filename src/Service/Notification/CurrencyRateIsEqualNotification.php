@@ -10,7 +10,7 @@ use App\Service\Utils\FloatUtils;
 
 class CurrencyRateIsEqualNotification extends AbstractCurrencyNotification
 {
-    private ?CurrencyRate $lastRate = null;
+    protected ?CurrencyRate $lastRate = null;
 
     public function __construct(
         private float $currencyRate,
