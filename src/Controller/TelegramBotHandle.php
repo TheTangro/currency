@@ -51,7 +51,8 @@ class TelegramBotHandle extends AbstractController
                 [
                     '/grabber_info',
                     '/last_rates',
-                    '/notifications'
+                    '/notifications',
+                    '/restart_daemons'
                 ]
             ],
             true,
