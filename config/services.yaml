@@ -34,6 +34,11 @@ services:
         autoconfigure: true
         public: true
         class: \App\Service\Telegram\Commands\LastRates
+    TelegramRestartCommand:
+        autowire: true
+        autoconfigure: true
+        public: true
+        class: \App\Service\Telegram\Commands\Restart
     App\Service\Notification\Transport\TelegramTransport:
         autowire: true
         autoconfigure: true
