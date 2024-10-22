@@ -7,7 +7,7 @@ namespace App\Service\Telegram\Commands;
 use App\Service\PoisonPillManager;
 use TelegramBot\Api\Types\Message;
 
-class Restart extends AbstractSimpleCommand
+class RestartDaemons extends AbstractSimpleCommand
 {
     public function __construct(
         private readonly PoisonPillManager $poisonPillManager
