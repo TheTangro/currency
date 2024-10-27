@@ -21,7 +21,7 @@ class BybitSubscriber implements SubscriberInterface
         $eventLoop = \React\EventLoop\Loop::get();
         $connector = new \Ratchet\Client\Connector($eventLoop);
 
-        $connector('wss://stream.bybit.com/spot/public/v3')
+        $connector('wss://stream.bybit.com/v5/public/spot')
             ->then(
                 function (WebSocket $conn) use ($currencyFrom, $currencyTo, $callback, $eventLoop) {
                     $this->logger->info('Connection has been established');
@@ -37,7 +37,7 @@ class BybitSubscriber implements SubscriberInterface
                         try {
                             $errorCount = 0;
                             $payload = json_decode($message->getPayload(), true);
-                            $rate = $payload['data']['c'] ?? null;
+                            $rate = $payload['data']['lastPrice'] ?? null;
 
                             if ($rate !== null) {
                                 $currencyRate = new CurrencyRate();
