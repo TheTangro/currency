@@ -88,21 +88,20 @@ class CryptoCurrencyParseCommand extends Command
             exit;
         }
 
-        $em = $this->kernel->getContainer()->get('doctrine')->getManager();
+        try {
+            $last = $this->currencyRateRepository->getLast(
+                $currencyRate->getCurrencyFrom(),
+                $currencyRate->getCurrencyTo()
+            );
 
-        if ($em->getConnection()->ping() === false) {
+            if (!$last || $last->getRate() !== $currencyRate->getRate()) {
+                $this->currencyManager->writeNewCurrencyRateAsObject($currencyRate);
+
+            }
+        } catch (\Throwable $e) {
+            $em = $this->kernel->getContainer()->get('doctrine')->getManager();
             $em->getConnection()->close();
             $em->getConnection()->connect();
-        }
-
-
-        $last = $this->currencyRateRepository->getLast(
-            $currencyRate->getCurrencyFrom(),
-            $currencyRate->getCurrencyTo()
-        );
-
-        if (!$last || $last->getRate() !== $currencyRate->getRate()) {
-            $this->currencyManager->writeNewCurrencyRateAsObject($currencyRate);
         }
     }
 }
